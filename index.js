@@ -1,19 +1,16 @@
 ﻿const express = require('express');
 const axios = require('axios');
-const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// 1. 填入您的 Google AI Studio API Key 及 Meta 憑證
-const GEMINI_API_KEY = "AQ.Ab8RN6KqcoDlQAC-09JrUmBZgMRq-KGQp5BwDzHKQUQIs3n4yQ"; 
+// 1. 填入您的 Google AI Studio API Key (Gemini API Key 2) 及 Meta 憑證
+const GEMINI_API_KEY = "AQ.Ab8RN6Ke61hTxLAYB1rwxs1xmYq7d9idg5M1InJbyr2cq5i3Ug"; 
 const WHATSAPP_TOKEN = "EAAgGsuur6TIBSGf1JlIBqnAKUf4wrFwvyy9gCRfHZCt4OjhMS6cEAtl6Gq6wYgWZCsy0Vu42tZAmZAZBAIbPzVIZBZAb17j2DZCkoyn5wIFRzkiZC9nPKpUWwZBeL537GaU8lYDI3Wdy3XMK1NDEk2xzdrYZBFYrZAyKZBwKVhZCKpRMPydrGiTIfX3qvE6PCgHmUZBaZCDk6HPIxs0a1gmDBN9mRuxTKkuvJf1DyHcWGwPPuA6vNt9xJYxjvFYzwSJF3wc5U1G1AestS4jW55O8FdINw3zx"; 
 const PHONE_NUMBER_ID = "1253729117822756"; 
 const VERIFY_TOKEN = "BE_WHATSAPP_TOKEN"; 
-
-const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 // 2. Meta Webhook 驗證 (GET)
 app.get('/webhook', (req, res) => {
@@ -74,13 +71,15 @@ app.post('/webhook', async (req, res) => {
 【家長最新訊息】：${parentQuery}
       `;
 
-      // 呼叫 Gemini 3.5 Flash 模型
-      const aiResult = await ai.models.generateContent({
-        model: 'gemini-3.5-flash',
-        contents: promptText,
-      });
+      // 直接以 API Key 網址參數呼叫 Google AI Studio Gemini API
+      const geminiResponse = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          contents: [{ parts: [{ text: promptText }] }]
+        }
+      );
 
-      const replyText = aiResult.text;
+      const replyText = geminiResponse.data.candidates[0].content.parts[0].text;
       console.log(`🤖 AI 生成回覆：\n${replyText}`);
 
       // 發送回覆給家長
@@ -98,7 +97,7 @@ app.post('/webhook', async (req, res) => {
       }
     }
   } catch (err) {
-    console.error('❌ 處理訊息時出錯：', err.message);
+    console.error('❌ 處理訊息時出錯：', err.response?.data || err.message);
   }
 });
 
