@@ -13,10 +13,11 @@ const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || "";
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID || "1253729117822756"; 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || "BE_WHATSAPP_TOKEN"; 
 
-// 初始化 Google GenAI SDK（支援 Google Cloud 的 AQ. 格式金鑰）
+// 初始化 Google GenAI SDK（加上 GCP 專案 ID）
 const ai = new GoogleGenAI({ 
   apiKey: GEMINI_API_KEY.trim(),
   vertexAI: true,
+  project: 'what-bot-504516',
   location: 'us-central1'
 });
 
