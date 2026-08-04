@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const axios = require('axios');
 
 const app = express();
@@ -26,7 +26,7 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// 3. 接收 WhatsApp 訊息並呼叫 Gemini 回覆 (POST)
+// 3. 接收 WhatsApp 訊息並呼叫 Gemini API (POST)
 app.post('/webhook', async (req, res) => {
   res.sendStatus(200);
 
@@ -71,21 +71,22 @@ app.post('/webhook', async (req, res) => {
 【家長最新訊息】：${parentQuery}
       `;
 
-      // 透過 x-goog-api-key 標頭呼叫 Gemini API
+      // 呼叫 Google 專門支援 AQ... 格式 API Key 的專用端點
       const geminiResponse = await axios.post(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
         {
-          contents: [{ parts: [{ text: promptText }] }]
+          model: 'gemini-1.5-flash',
+          messages: [{ role: 'user', content: promptText }]
         },
         {
           headers: {
-            'x-goog-api-key': GEMINI_API_KEY,
+            'Authorization': `Bearer ${GEMINI_API_KEY}`,
             'Content-Type': 'application/json'
           }
         }
       );
 
-      const replyText = geminiResponse.data.candidates[0].content.parts[0].text;
+      const replyText = geminiResponse.data.choices[0].message.content;
       console.log(`🤖 AI 生成回覆：\n${replyText}`);
 
       // 發送回覆給家長
