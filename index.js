@@ -13,7 +13,7 @@ const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || "EAAgGsuur6TIBSGf1JlIBqnAKU
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID || "1253729117822756"; 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || "BE_WHATSAPP_TOKEN"; 
 
-// 初始化 Google 官方 SDK (自動支援 AQ. 格式 API Key)
+// 初始化 Google 官方 SDK (完全相容 AQ. 格式 API Key)
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY.trim() });
 
 // 2. Meta Webhook 驗證 (GET)
