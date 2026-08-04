@@ -1,16 +1,20 @@
 const express = require('express');
 const axios = require('axios');
+const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// 1. 已更新為您最新的正確 AQ Key（含大寫 I）
+// 1. 憑證設定
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AQ.Ab8RN6ICtb0MPp1Wo3L42HnQ3uqggWJifDOuXgEnf2dlI45SjA"; 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || "EAAgGsuur6TIBSGf1JlIBqnAKUf4wrFwvyy9gCRfHZCt4OjhMS6cEAtl6Gq6wYgWZCsy0Vu42tZAmZAZBAIbPzVIZBZAb17j2DZCkoyn5wIFRzkiZC9nPKpUWwZBeL537GaU8lYDI3Wdy3XMK1NDEk2xzdrYZBFYrZAyKZBwKVhZCKpRMPydrGiTIfX3qvE6PCgHmUZBaZCDk6HPIxs0a1gmDBN9mRuxTKkuvJf1DyHcWGwPPuA6vNt9xJYxjvFYzwSJF3wc5U1G1AestS4jW55O8FdINw3zx"; 
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID || "1253729117822756"; 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || "BE_WHATSAPP_TOKEN"; 
+
+// 初始化 Google 官方 SDK (自動支援 AQ. 格式 API Key)
+const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY.trim() });
 
 // 2. Meta Webhook 驗證 (GET)
 app.get('/webhook', (req, res) => {
@@ -26,7 +30,7 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// 3. 接收 WhatsApp 訊息並呼叫 Gemini 原生 API (POST)
+// 3. 接收 WhatsApp 訊息並呼叫 Gemini 原生 SDK (POST)
 app.post('/webhook', async (req, res) => {
   res.sendStatus(200);
 
@@ -71,25 +75,13 @@ app.post('/webhook', async (req, res) => {
 【家長最新訊息】：${parentQuery}
       `;
 
-      // 呼叫 Google 原生 Gemini API (透過 x-goog-api-key 標頭傳送 AQ. 金鑰)
-      const geminiResponse = await axios.post(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-        {
-          contents: [
-            {
-              parts: [{ text: promptText }]
-            }
-          ]
-        },
-        {
-          headers: {
-            'x-goog-api-key': GEMINI_API_KEY.trim(),
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      // 使用官方 SDK 呼叫 Gemini 1.5 Flash
+      const response = await ai.models.generateContent({
+        model: 'gemini-1.5-flash',
+        contents: promptText,
+      });
 
-      const replyText = geminiResponse.data.candidates[0].content.parts[0].text;
+      const replyText = response.text;
       console.log(`🤖 AI 生成回覆：\n${replyText}`);
 
       // 發送回覆至家長 WhatsApp
