@@ -71,9 +71,9 @@ app.post('/webhook', async (req, res) => {
 【家長最新訊息】：${parentQuery}
       `;
 
-      // 呼叫 Google 原生 Gemini API 端點（完全相容 AQ. 開頭的新版 API Key）
+      // 呼叫 Google 原生 Gemini API (透過 x-goog-api-key 標頭傳送 AQ. 金鑰)
       const geminiResponse = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
         {
           contents: [
             {
@@ -83,6 +83,7 @@ app.post('/webhook', async (req, res) => {
         },
         {
           headers: {
+            'x-goog-api-key': GEMINI_API_KEY.trim(),
             'Content-Type': 'application/json'
           }
         }
