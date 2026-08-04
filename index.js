@@ -6,8 +6,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// 1. 優先從 Render 環境變數讀取，未設定時自動使用後備預設值
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AQ.Ab8RN6ICtb0MPp1Wo3L42HnQ3uqggWJifDOuXgEnf2dll45SjA"; 
+// 1. 已更新為您最新的正確 AQ Key（含大寫 I）
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AQ.Ab8RN6ICtb0MPp1Wo3L42HnQ3uqggWJifDOuXgEnf2dlI45SjA"; 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || "EAAgGsuur6TIBSGf1JlIBqnAKUf4wrFwvyy9gCRfHZCt4OjhMS6cEAtl6Gq6wYgWZCsy0Vu42tZAmZAZBAIbPzVIZBZAb17j2DZCkoyn5wIFRzkiZC9nPKpUWwZBeL537GaU8lYDI3Wdy3XMK1NDEk2xzdrYZBFYrZAyKZBwKVhZCKpRMPydrGiTIfX3qvE6PCgHmUZBaZCDk6HPIxs0a1gmDBN9mRuxTKkuvJf1DyHcWGwPPuA6vNt9xJYxjvFYzwSJF3wc5U1G1AestS4jW55O8FdINw3zx"; 
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID || "1253729117822756"; 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || "BE_WHATSAPP_TOKEN"; 
