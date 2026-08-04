@@ -6,11 +6,11 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// 1. 填入您的最新 AQ... API Key 及 Meta 憑證
-const GEMINI_API_KEY = "AQ.Ab8RN6ICtb0MPp1Wo3L42HnQ3uqggWJifDOuXgEnf2dll45SjA"; 
-const WHATSAPP_TOKEN = "EAAgGsuur6TIBSGf1JlIBqnAKUf4wrFwvyy9gCRfHZCt4OjhMS6cEAtl6Gq6wYgWZCsy0Vu42tZAmZAZBAIbPzVIZBZAb17j2DZCkoyn5wIFRzkiZC9nPKpUWwZBeL537GaU8lYDI3Wdy3XMK1NDEk2xzdrYZBFYrZAyKZBwKVhZCKpRMPydrGiTIfX3qvE6PCgHmUZBaZCDk6HPIxs0a1gmDBN9mRuxTKkuvJf1DyHcWGwPPuA6vNt9xJYxjvFYzwSJF3wc5U1G1AestS4jW55O8FdINw3zx"; 
-const PHONE_NUMBER_ID = "1253729117822756"; 
-const VERIFY_TOKEN = "BE_WHATSAPP_TOKEN"; 
+// 1. 優先從 Render 環境變數讀取，未設定時自動使用後備預設值
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AQ.Ab8RN6ICtb0MPp1Wo3L42HnQ3uqggWJifDOuXgEnf2dll45SjA"; 
+const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || "EAAgGsuur6TIBSGf1JlIBqnAKUf4wrFwvyy9gCRfHZCt4OjhMS6cEAtl6Gq6wYgWZCsy0Vu42tZAmZAZBAIbPzVIZBZAb17j2DZCkoyn5wIFRzkiZC9nPKpUWwZBeL537GaU8lYDI3Wdy3XMK1NDEk2xzdrYZBFYrZAyKZBwKVhZCKpRMPydrGiTIfX3qvE6PCgHmUZBaZCDk6HPIxs0a1gmDBN9mRuxTKkuvJf1DyHcWGwPPuA6vNt9xJYxjvFYzwSJF3wc5U1G1AestS4jW55O8FdINw3zx"; 
+const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID || "1253729117822756"; 
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN || "BE_WHATSAPP_TOKEN"; 
 
 // 2. Meta Webhook 驗證 (GET)
 app.get('/webhook', (req, res) => {
@@ -26,7 +26,7 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// 3. 接收 WhatsApp 訊息並呼叫 Gemini API (POST)
+// 3. 接收 WhatsApp 訊息並呼叫 Gemini 原生 API (POST)
 app.post('/webhook', async (req, res) => {
   res.sendStatus(200);
 
@@ -71,25 +71,27 @@ app.post('/webhook', async (req, res) => {
 【家長最新訊息】：${parentQuery}
       `;
 
-      // 呼叫 Google 專門支援 AQ... 格式 API Key 的專用端點
+      // 呼叫 Google 原生 Gemini API 端點（完全相容 AQ. 開頭的新版 API Key）
       const geminiResponse = await axios.post(
-        'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
         {
-          model: 'gemini-1.5-flash',
-          messages: [{ role: 'user', content: promptText }]
+          contents: [
+            {
+              parts: [{ text: promptText }]
+            }
+          ]
         },
         {
           headers: {
-            'Authorization': `Bearer ${GEMINI_API_KEY}`,
             'Content-Type': 'application/json'
           }
         }
       );
 
-      const replyText = geminiResponse.data.choices[0].message.content;
+      const replyText = geminiResponse.data.candidates[0].content.parts[0].text;
       console.log(`🤖 AI 生成回覆：\n${replyText}`);
 
-      // 發送回覆給家長
+      // 發送回覆至家長 WhatsApp
       if (WHATSAPP_TOKEN && PHONE_NUMBER_ID) {
         await axios.post(
           `https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
@@ -109,5 +111,5 @@ app.post('/webhook', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 BE WhatsApp AI 伺服器順利啟動！網址：http://localhost:${PORT}`);
+  console.log(`🚀 BE WhatsApp AI 伺服器順利啟動！埠號：${PORT}`);
 });
