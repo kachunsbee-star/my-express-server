@@ -13,12 +13,9 @@ const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || "";
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID || "1253729117822756"; 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || "BE_WHATSAPP_TOKEN"; 
 
-// 初始化 Google GenAI SDK（加上 GCP 專案 ID）
+// 初始化 Google GenAI SDK（只需傳入 apiKey 即可）
 const ai = new GoogleGenAI({ 
-  apiKey: GEMINI_API_KEY.trim(),
-  vertexAI: true,
-  project: 'what-bot-504516',
-  location: 'us-central1'
+  apiKey: GEMINI_API_KEY.trim()
 });
 
 // 2. Meta Webhook 驗證 (GET)
@@ -80,7 +77,7 @@ app.post('/webhook', async (req, res) => {
 【家長最新訊息】：${parentQuery}
       `;
 
-      // 使用最新 Gemini 2.5 Flash 模型
+      // 呼叫 Gemini 2.5 Flash 最新模型
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: promptText,
