@@ -6,8 +6,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// 1. 填入您的 Google AI Studio API Key (Gemini API Key 2) 及 Meta 憑證
-const GEMINI_API_KEY = "AQ.Ab8RN6Ke61hTxLAYB1rwxs1xmYq7d9idg5M1InJbyr2cq5i3Ug"; 
+// 1. 填入您的最新 AQ... API Key 及 Meta 憑證
+const GEMINI_API_KEY = "AQ.Ab8RN6ICtb0MPp1Wo3L42HnQ3uqggWJifDOuXgEnf2dll45SjA"; 
 const WHATSAPP_TOKEN = "EAAgGsuur6TIBSGf1JlIBqnAKUf4wrFwvyy9gCRfHZCt4OjhMS6cEAtl6Gq6wYgWZCsy0Vu42tZAmZAZBAIbPzVIZBZAb17j2DZCkoyn5wIFRzkiZC9nPKpUWwZBeL537GaU8lYDI3Wdy3XMK1NDEk2xzdrYZBFYrZAyKZBwKVhZCKpRMPydrGiTIfX3qvE6PCgHmUZBaZCDk6HPIxs0a1gmDBN9mRuxTKkuvJf1DyHcWGwPPuA6vNt9xJYxjvFYzwSJF3wc5U1G1AestS4jW55O8FdINw3zx"; 
 const PHONE_NUMBER_ID = "1253729117822756"; 
 const VERIFY_TOKEN = "BE_WHATSAPP_TOKEN"; 
@@ -71,11 +71,17 @@ app.post('/webhook', async (req, res) => {
 【家長最新訊息】：${parentQuery}
       `;
 
-      // 直接以 API Key 網址參數呼叫 Google AI Studio Gemini API
+      // 透過 x-goog-api-key 標頭呼叫 Gemini API
       const geminiResponse = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
         {
           contents: [{ parts: [{ text: promptText }] }]
+        },
+        {
+          headers: {
+            'x-goog-api-key': GEMINI_API_KEY,
+            'Content-Type': 'application/json'
+          }
         }
       );
 
